@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.authzed.intellij</groupId>
+    <artifactId>intellij-spicedb-plugin</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>SpiceDB IntelliJ Plugin</name>
+    <description>Syntax highlighting for SpiceDB schema (.zed) files</description>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <intellij.version>2024.3.4.1</intellij.version>
+        <!-- SDK stored outside target/ so 'clean' doesn't delete it -->
+        <intellij.sdk.dir>${project.basedir}/.intellij-sdk</intellij.sdk.dir>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jetbrains-releases</id>
+            <url>https://www.jetbrains.com/intellij-repository/releases</url>
+        </repository>
+        <repository>
+            <id>jetbrains-dependencies</id>
+            <url>https://cache-redirector.jetbrains.com/intellij-dependencies</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- JetBrains Annotations -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>24.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- IntelliJ Platform SDK JARs - system scope pointing to unpacked SDK -->
+        <!-- Core utilities: Language, IElementType, FlexLexer, FlexAdapter, ParserDefinition, LanguageFileType -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>util-8</artifactId>
+            <version>${intellij.version}</version>
+            <scope>system</scope>
+            <systemPath>${intellij.sdk.dir}/lib/util-8.jar</systemPath>
+        </dependency>
+        <!-- Client API: SyntaxHighlighter, PairedBraceMatcher -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>app-client</artifactId>
+            <version>${intellij.version}</version>
+            <scope>system</scope>
+            <systemPath>${intellij.sdk.dir}/lib/app-client.jar</systemPath>
+        </dependency>
+        <!-- Additional platform classes -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>app</artifactId>
+            <version>${intellij.version}</version>
+            <scope>system</scope>
+            <systemPath>${intellij.sdk.dir}/lib/app.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>util</artifactId>
+            <version>${intellij.version}</version>
+            <scope>system</scope>
+            <systemPath>${intellij.sdk.dir}/lib/util.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>lib</artifactId>
+            <version>${intellij.version}</version>
+            <scope>system</scope>
+            <systemPath>${intellij.sdk.dir}/lib/lib.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Download and unpack IntelliJ SDK -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack-intellij-sdk</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.jetbrains.intellij.idea</groupId>
+                                    <artifactId>ideaIC</artifactId>
+                                    <version>${intellij.version}</version>
+                                    <type>zip</type>
+                                    <outputDirectory>${intellij.sdk.dir}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.12.1</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
+            </plugin>
+
+            <!-- Package as IntelliJ plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/plugin.xml</descriptor>
+                    </descriptors>
+                    <finalName>${project.artifactId}-${project.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

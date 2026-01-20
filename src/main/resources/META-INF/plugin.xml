@@ -1,0 +1,58 @@
+<idea-plugin>
+    <id>com.authzed.intellij.spicedb</id>
+    <name>SpiceDB</name>
+    <vendor email="support@authzed.com" url="https://authzed.com">AuthZed</vendor>
+
+    <description><![CDATA[
+        Syntax highlighting for SpiceDB schema (.zed) files.
+
+        <h2>Features</h2>
+        <ul>
+            <li>Syntax highlighting for SpiceDB schema language</li>
+            <li>Go to Definition (Ctrl+Click) for type references</li>
+            <li>Brace matching for { } and ( )</li>
+            <li>Line and block comment support (// and /* */)</li>
+        </ul>
+
+        <h2>SpiceDB</h2>
+        <p>SpiceDB is an open source, Google Zanzibar-inspired database for storing and computing
+        permissions data. It provides a schema language for defining permission models.</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <h2>1.0.0</h2>
+        <ul>
+            <li>Initial release with syntax highlighting support</li>
+        </ul>
+    ]]></change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+                name="SpiceDB Schema"
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbFileType"
+                fieldName="INSTANCE"
+                language="SpiceDB"
+                extensions="zed"/>
+
+        <lang.parserDefinition
+                language="SpiceDB"
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory
+                language="SpiceDB"
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbSyntaxHighlighterFactory"/>
+
+        <lang.braceMatcher
+                language="SpiceDB"
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbBraceMatcher"/>
+
+        <lang.commenter
+                language="SpiceDB"
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbCommenter"/>
+
+        <gotoDeclarationHandler
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbGotoDeclarationHandler"/>
+    </extensions>
+</idea-plugin>
