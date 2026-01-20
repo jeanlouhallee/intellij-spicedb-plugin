@@ -1,0 +1,17 @@
+# Maven
+target/
+
+# IntelliJ SDK (downloaded during build)
+.intellij-sdk/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# macOS
+.DS_Store
+
+# Editor backups
+*~
+*.swp
