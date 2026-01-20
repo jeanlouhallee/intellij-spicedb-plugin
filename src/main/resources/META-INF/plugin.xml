@@ -1,15 +1,17 @@
 <idea-plugin>
-    <id>com.authzed.intellij.spicedb</id>
+    <id>community.spicedb</id>
     <name>SpiceDB</name>
-    <vendor email="support@authzed.com" url="https://authzed.com">AuthZed</vendor>
+    <vendor>SpiceDB Community</vendor>
 
     <description><![CDATA[
-        Syntax highlighting for SpiceDB schema (.zed) files.
+        <p><b>Community plugin</b> for <a href="https://github.com/authzed/spicedb">SpiceDB</a> schema (.zed) files.
+        Not affiliated with AuthZed.</p>
 
         <h2>Features</h2>
         <ul>
             <li>Syntax highlighting for SpiceDB schema language</li>
-            <li>Go to Definition (Ctrl+Click) for type references</li>
+            <li>Error highlighting for undefined types and references</li>
+            <li>Go to Definition (Ctrl+Click) for type references and arrow expressions</li>
             <li>Brace matching for { } and ( )</li>
             <li>Line and block comment support (// and /* */)</li>
         </ul>

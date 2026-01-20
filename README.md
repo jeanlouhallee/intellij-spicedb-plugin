@@ -1,6 +1,8 @@
 # SpiceDB IntelliJ Plugin
 
-Syntax highlighting and validation for [SpiceDB](https://github.com/authzed/spicedb) schema files (`.zed`).
+Community plugin for [SpiceDB](https://github.com/authzed/spicedb) schema files (`.zed`).
+
+> **Note:** This is a community-maintained plugin, not affiliated with or endorsed by AuthZed.
 
 ## Features
 
@@ -14,7 +16,7 @@ Syntax highlighting and validation for [SpiceDB](https://github.com/authzed/spic
 
 ### From Release (doesn't work yet. TODO)
 
-1. Download the latest `.zip` from [Releases](https://github.com/authzed/intellij-spicedb-plugin/releases)
+1. Download the latest `.zip` from Releases
 2. In IntelliJ: **Settings → Plugins → ⚙️ → Install Plugin from Disk...**
 3. Select the downloaded ZIP file
 4. Restart IntelliJ
