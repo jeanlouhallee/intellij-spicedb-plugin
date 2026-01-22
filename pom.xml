@@ -79,6 +79,22 @@
             <scope>system</scope>
             <systemPath>${intellij.sdk.dir}/lib/lib.jar</systemPath>
         </dependency>
+        <!-- lib-client contains kotlinx.collections.immutable classes -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>lib-client</artifactId>
+            <version>${intellij.version}</version>
+            <scope>system</scope>
+            <systemPath>${intellij.sdk.dir}/lib/lib-client.jar</systemPath>
+        </dependency>
+        <!-- util_rt contains Pair, Ref, and other utility classes -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>util_rt</artifactId>
+            <version>${intellij.version}</version>
+            <scope>system</scope>
+            <systemPath>${intellij.sdk.dir}/lib/util_rt.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
