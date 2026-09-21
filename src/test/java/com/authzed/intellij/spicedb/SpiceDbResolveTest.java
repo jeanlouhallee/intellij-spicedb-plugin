@@ -217,6 +217,21 @@ public class SpiceDbResolveTest extends BasePlatformTestCase {
         assertEquals("iam.zed", targets.get(0).getContainingFile().getName());
     }
 
+    public void testTypeRefResolvesWhenRelationNameShadowsTypeName() {
+        // Regression for issue #1: relation named identically to its type
+        List<PsiElement> targets = resolveAtCaret("shadow.zed", """
+                definition platform {
+                }
+
+                definition api_client {
+                  relation platform: plat<caret>form
+                }
+                """);
+        assertSize(1, targets);
+        assertInstanceOf(targets.get(0), SpiceDbObjectDef.class);
+        assertEquals("platform", ((SpiceDbObjectDef) targets.get(0)).getName());
+    }
+
     public void testFindUsagesOfRelation() {
         addComposeFiles();
         myFixture.configureByText("extra.zed", """
