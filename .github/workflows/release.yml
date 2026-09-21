@@ -40,4 +40,5 @@ jobs:
           gh release create "${{ github.ref_name }}" \
             --title "${{ github.ref_name }}" \
             --generate-notes \
-            build/distributions/*.zip
+            build/distributions/*.zip \
+          || gh release upload "${{ github.ref_name }}" build/distributions/*.zip --clobber
