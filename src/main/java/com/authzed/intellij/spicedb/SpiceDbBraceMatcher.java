@@ -1,6 +1,6 @@
 package com.authzed.intellij.spicedb;
 
-import com.authzed.intellij.spicedb.psi.SpiceDbTokenTypes;
+import com.authzed.intellij.spicedb.psi.SpiceDbTypes;
 import com.intellij.lang.BracePair;
 import com.intellij.lang.PairedBraceMatcher;
 import com.intellij.psi.PsiFile;
@@ -14,8 +14,8 @@ import org.jetbrains.annotations.Nullable;
 public class SpiceDbBraceMatcher implements PairedBraceMatcher {
 
     private static final BracePair[] PAIRS = new BracePair[]{
-            new BracePair(SpiceDbTokenTypes.LBRACE, SpiceDbTokenTypes.RBRACE, true),
-            new BracePair(SpiceDbTokenTypes.LPAREN, SpiceDbTokenTypes.RPAREN, false)
+            new BracePair(SpiceDbTypes.LBRACE, SpiceDbTypes.RBRACE, true),
+            new BracePair(SpiceDbTypes.LPAREN, SpiceDbTypes.RPAREN, false)
     };
 
     @Override

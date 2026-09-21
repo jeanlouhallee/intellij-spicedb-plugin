@@ -9,11 +9,13 @@
 
         <h2>Features</h2>
         <ul>
-            <li>Syntax highlighting for SpiceDB schema language</li>
-            <li>Error highlighting for undefined types and references</li>
-            <li>Go to Definition (Ctrl+Click) for type references and arrow expressions</li>
-            <li>Brace matching for { } and ( )</li>
-            <li>Line and block comment support (// and /* */)</li>
+            <li>Full PSI parser for the SpiceDB schema language, including composable
+                schema syntax (partials, splats, use/import, caveats, wildcards)</li>
+            <li>Go to Definition (Ctrl+Click) for type references, subject relations
+                (type#relation), arrow targets, caveats, partials, and local members</li>
+            <li>Find Usages for definitions, partials, relations, permissions, and caveats</li>
+            <li>Syntax and semantic highlighting</li>
+            <li>Brace matching and comment support</li>
         </ul>
 
         <h2>SpiceDB</h2>
@@ -22,6 +24,13 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <h2>2.0.0</h2>
+        <ul>
+            <li>Rewrote the plugin around a real PSI parser (Grammar-Kit)</li>
+            <li>Navigation now works across nested schema directories and supports
+                partials, splats, subject relations, caveats, and multi-type arrows</li>
+            <li>Added Find Usages</li>
+        </ul>
         <h2>1.0.0</h2>
         <ul>
             <li>Initial release with syntax highlighting support</li>
@@ -54,7 +63,12 @@
                 language="SpiceDB"
                 implementationClass="com.authzed.intellij.spicedb.SpiceDbCommenter"/>
 
-        <gotoDeclarationHandler
-                implementationClass="com.authzed.intellij.spicedb.SpiceDbGotoDeclarationHandler"/>
+        <lang.findUsagesProvider
+                language="SpiceDB"
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbFindUsagesProvider"/>
+
+        <annotator
+                language="SpiceDB"
+                implementationClass="com.authzed.intellij.spicedb.SpiceDbAnnotator"/>
     </extensions>
 </idea-plugin>

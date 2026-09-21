@@ -1,7 +1,10 @@
 package com.authzed.intellij.spicedb;
 
+import com.authzed.intellij.spicedb.lexer.SpiceDbLexerAdapter;
+import com.authzed.intellij.spicedb.parser.SpiceDbParser;
 import com.authzed.intellij.spicedb.psi.SpiceDbFile;
 import com.authzed.intellij.spicedb.psi.SpiceDbTokenSets;
+import com.authzed.intellij.spicedb.psi.SpiceDbTypes;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
@@ -15,8 +18,8 @@ import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Parser definition for SpiceDB schema files.
- * Uses a minimal implementation since we only need lexer-based syntax highlighting.
+ * Parser definition for SpiceDB schema files, backed by the Grammar-Kit
+ * generated parser and JFlex lexer.
  */
 public class SpiceDbParserDefinition implements ParserDefinition {
 
@@ -25,21 +28,13 @@ public class SpiceDbParserDefinition implements ParserDefinition {
     @NotNull
     @Override
     public Lexer createLexer(Project project) {
-        return new SpiceDbLexer();
+        return new SpiceDbLexerAdapter();
     }
 
     @NotNull
     @Override
     public PsiParser createParser(Project project) {
-        // Minimal parser - we only need lexer-based highlighting
-        return (root, builder) -> {
-            var marker = builder.mark();
-            while (!builder.eof()) {
-                builder.advanceLexer();
-            }
-            marker.done(root);
-            return builder.getTreeBuilt();
-        };
+        return new SpiceDbParser();
     }
 
     @NotNull
@@ -63,7 +58,7 @@ public class SpiceDbParserDefinition implements ParserDefinition {
     @NotNull
     @Override
     public PsiElement createElement(ASTNode node) {
-        throw new UnsupportedOperationException("Not implemented for lexer-only plugin");
+        return SpiceDbTypes.Factory.createElement(node);
     }
 
     @NotNull

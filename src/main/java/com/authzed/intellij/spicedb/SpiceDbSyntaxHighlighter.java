@@ -1,6 +1,8 @@
 package com.authzed.intellij.spicedb;
 
-import com.authzed.intellij.spicedb.psi.SpiceDbTokenTypes;
+import com.authzed.intellij.spicedb.lexer.SpiceDbLexerAdapter;
+import com.authzed.intellij.spicedb.psi.SpiceDbTokenSets;
+import com.authzed.intellij.spicedb.psi.SpiceDbTypes;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -14,7 +16,8 @@ import java.util.Map;
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 
 /**
- * Syntax highlighter for SpiceDB schema files.
+ * Lexer-based syntax highlighter for SpiceDB schema files.
+ * Name/reference coloring is layered on top by {@link SpiceDbAnnotator}.
  */
 public class SpiceDbSyntaxHighlighter extends SyntaxHighlighterBase {
 
@@ -23,7 +26,6 @@ public class SpiceDbSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey OPERATOR =
             createTextAttributesKey("SPICEDB_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN);
 
-    // Permission operators - distinct colors for visibility
     public static final TextAttributesKey OP_UNION =
             createTextAttributesKey("SPICEDB_OP_UNION", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey OP_INTERSECTION =
@@ -38,6 +40,8 @@ public class SpiceDbSyntaxHighlighter extends SyntaxHighlighterBase {
             createTextAttributesKey("SPICEDB_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
     public static final TextAttributesKey NUMBER =
             createTextAttributesKey("SPICEDB_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
+    public static final TextAttributesKey STRING =
+            createTextAttributesKey("SPICEDB_STRING", DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey BRACES =
             createTextAttributesKey("SPICEDB_BRACES", DefaultLanguageHighlighterColors.BRACES);
     public static final TextAttributesKey PARENTHESES =
@@ -45,7 +49,7 @@ public class SpiceDbSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey PREDEFINED_SYMBOL =
             createTextAttributesKey("SPICEDB_PREDEFINED_SYMBOL", DefaultLanguageHighlighterColors.PREDEFINED_SYMBOL);
 
-    // Declaration names - each with distinct colors
+    // Declaration names, applied by the annotator
     public static final TextAttributesKey DEFINITION_NAME =
             createTextAttributesKey("SPICEDB_DEFINITION_NAME", DefaultLanguageHighlighterColors.CLASS_NAME);
     public static final TextAttributesKey RELATION_NAME =
@@ -54,57 +58,43 @@ public class SpiceDbSyntaxHighlighter extends SyntaxHighlighterBase {
             createTextAttributesKey("SPICEDB_PERMISSION_NAME", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
     public static final TextAttributesKey CAVEAT_NAME =
             createTextAttributesKey("SPICEDB_CAVEAT_NAME", DefaultLanguageHighlighterColors.INTERFACE_NAME);
+    public static final TextAttributesKey TYPE_REFERENCE =
+            createTextAttributesKey("SPICEDB_TYPE_REFERENCE", DefaultLanguageHighlighterColors.CLASS_REFERENCE);
 
     private static final Map<IElementType, TextAttributesKey[]> TOKEN_HIGHLIGHTS = new HashMap<>();
 
     static {
-        // Keywords
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_DEFINITION, pack(KEYWORD));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_RELATION, pack(KEYWORD));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_PERMISSION, pack(KEYWORD));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_CAVEAT, pack(KEYWORD));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_WITH, pack(KEYWORD));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_IMPORT, pack(KEYWORD));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_FROM, pack(KEYWORD));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.KEYWORD_NIL, pack(KEYWORD));
+        for (IElementType keyword : SpiceDbTokenSets.KEYWORDS.getTypes()) {
+            TOKEN_HIGHLIGHTS.put(keyword, pack(KEYWORD));
+        }
 
-        // Permission operators - distinct colors
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.OP_UNION, pack(OP_UNION));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.OP_INTERSECTION, pack(OP_INTERSECTION));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.OP_ARROW, pack(OP_ARROW));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.PLUS, pack(OP_UNION));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.AMP, pack(OP_INTERSECTION));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.ARROW, pack(OP_ARROW));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.MINUS, pack(OPERATOR));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.PIPE, pack(OPERATOR));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.EQ, pack(OPERATOR));
 
-        // Other operators
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.OP_EXCLUSION, pack(OPERATOR));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.OP_TYPE_UNION, pack(OPERATOR));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.OP_ASSIGN, pack(OPERATOR));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.LINE_COMMENT, pack(LINE_COMMENT));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.BLOCK_COMMENT, pack(BLOCK_COMMENT));
 
-        // Comments
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.LINE_COMMENT, pack(LINE_COMMENT));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.BLOCK_COMMENT, pack(BLOCK_COMMENT));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.IDENTIFIER, pack(IDENTIFIER));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.NUMBER, pack(NUMBER));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.STRING, pack(STRING));
 
-        // Literals and identifiers
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.IDENTIFIER, pack(IDENTIFIER));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.NUMBER, pack(NUMBER));
-
-        // Declaration names
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.DEFINITION_NAME, pack(DEFINITION_NAME));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.RELATION_NAME, pack(RELATION_NAME));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.PERMISSION_NAME, pack(PERMISSION_NAME));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.CAVEAT_NAME, pack(CAVEAT_NAME));
-
-        // Punctuation
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.LBRACE, pack(BRACES));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.RBRACE, pack(BRACES));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.LPAREN, pack(PARENTHESES));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.RPAREN, pack(PARENTHESES));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.HASH, pack(PREDEFINED_SYMBOL));
-        TOKEN_HIGHLIGHTS.put(SpiceDbTokenTypes.WILDCARD, pack(PREDEFINED_SYMBOL));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.LBRACE, pack(BRACES));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.RBRACE, pack(BRACES));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.LPAREN, pack(PARENTHESES));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.RPAREN, pack(PARENTHESES));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.HASH, pack(PREDEFINED_SYMBOL));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.STAR, pack(PREDEFINED_SYMBOL));
+        TOKEN_HIGHLIGHTS.put(SpiceDbTypes.DOTDOTDOT, pack(PREDEFINED_SYMBOL));
     }
 
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new SpiceDbLexer();
+        return new SpiceDbLexerAdapter();
     }
 
     @Override
