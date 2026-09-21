@@ -1,0 +1,162 @@
+{
+  parserClass="com.authzed.intellij.spicedb.parser.SpiceDbParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="SpiceDb"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.authzed.intellij.spicedb.psi"
+  psiImplPackage="com.authzed.intellij.spicedb.psi.impl"
+
+  elementTypeHolderClass="com.authzed.intellij.spicedb.psi.SpiceDbTypes"
+  elementTypeClass="com.authzed.intellij.spicedb.psi.SpiceDbElementType"
+  tokenTypeClass="com.authzed.intellij.spicedb.psi.SpiceDbTokenType"
+
+  tokens=[
+    DEFINITION='definition'
+    PARTIAL='partial'
+    CAVEAT='caveat'
+    RELATION='relation'
+    PERMISSION='permission'
+    USE='use'
+    IMPORT='import'
+    WITH='with'
+    AND='and'
+    NIL='nil'
+
+    DOTDOTDOT='...'
+    ARROW='->'
+    LE='<='
+    GE='>='
+    EQEQ='=='
+    NEQ='!='
+    ANDAND='&&'
+    OROR='||'
+
+    LBRACE='{'
+    RBRACE='}'
+    LPAREN='('
+    RPAREN=')'
+    LBRACKET='['
+    RBRACKET=']'
+    PIPE='|'
+    COLON=':'
+    HASH='#'
+    STAR='*'
+    PLUS='+'
+    MINUS='-'
+    AMP='&'
+    EQ='='
+    DOT='.'
+    COMMA=','
+    SEMICOLON=';'
+    LT='<'
+    GT='>'
+    BANG='!'
+    QUESTION='?'
+    PERCENT='%'
+    SLASH='/'
+
+    LINE_COMMENT='regexp://[^\r\n]*'
+    BLOCK_COMMENT='regexp:/\*([^*]|\*+[^*/])*\*+/'
+    IDENTIFIER='regexp:[a-zA-Z_][a-zA-Z0-9_]*'
+    NUMBER='regexp:[0-9]+'
+    STRING='regexp:"([^"\r\n\\]|\\.)*"'
+  ]
+}
+
+schemaFile ::= item_*
+
+private item_ ::= use_stmt | import_stmt | caveat_def | object_def | partial_def | SEMICOLON
+
+use_stmt ::= USE (IMPORT | PARTIAL | IDENTIFIER) {pin=1}
+
+import_stmt ::= IMPORT STRING SEMICOLON? {pin=1}
+
+caveat_def ::= CAVEAT IDENTIFIER LPAREN param_list? RPAREN cel_block {
+  pin=1
+  implements="com.authzed.intellij.spicedb.psi.SpiceDbNamedElement"
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbNamedElementImpl"
+}
+
+param_list ::= param (COMMA param)*
+param ::= IDENTIFIER cel_type {pin=1}
+cel_type ::= IDENTIFIER (LT cel_type (COMMA cel_type)* GT)?
+
+cel_block ::= LBRACE cel_item_* RBRACE {pin=1}
+private cel_item_ ::= cel_block | cel_token_
+private cel_token_ ::= IDENTIFIER | NUMBER | STRING
+  | LPAREN | RPAREN | LBRACKET | RBRACKET
+  | LT | GT | LE | GE | EQEQ | NEQ | ANDAND | OROR | BANG | QUESTION | PERCENT | SLASH
+  | PLUS | MINUS | STAR | AMP | PIPE | COLON | COMMA | DOT | EQ | HASH | ARROW
+  | NIL | WITH | AND | SEMICOLON
+
+object_def ::= DEFINITION IDENTIFIER LBRACE def_member_* RBRACE {
+  pin=1
+  implements="com.authzed.intellij.spicedb.psi.SpiceDbNamedElement"
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbNamedElementImpl"
+}
+
+partial_def ::= PARTIAL IDENTIFIER LBRACE def_member_* RBRACE {
+  pin=1
+  implements="com.authzed.intellij.spicedb.psi.SpiceDbNamedElement"
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbNamedElementImpl"
+}
+
+private def_member_ ::= relation_decl | permission_decl | partial_splat
+
+partial_splat ::= DOTDOTDOT partial_ref {pin=1}
+
+partial_ref ::= IDENTIFIER {
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbRefElementImpl"
+}
+
+relation_decl ::= RELATION IDENTIFIER COLON type_union {
+  pin=1
+  implements="com.authzed.intellij.spicedb.psi.SpiceDbNamedElement"
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbNamedElementImpl"
+}
+
+type_union ::= type_annotation (PIPE type_annotation)*
+
+type_annotation ::= type_ref (HASH subrel_ref | COLON STAR)? with_clause? {pin=1}
+
+with_clause ::= WITH caveat_ref (AND caveat_ref)* {pin=1}
+
+type_ref ::= IDENTIFIER {
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbRefElementImpl"
+}
+
+subrel_ref ::= IDENTIFIER {
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbRefElementImpl"
+}
+
+caveat_ref ::= IDENTIFIER {
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbRefElementImpl"
+}
+
+permission_decl ::= PERMISSION IDENTIFIER EQ perm_expr {
+  pin=1
+  implements="com.authzed.intellij.spicedb.psi.SpiceDbNamedElement"
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbNamedElementImpl"
+}
+
+perm_expr ::= union_expr
+
+union_expr ::= intersect_expr (PLUS intersect_expr)*
+intersect_expr ::= exclude_expr (AMP exclude_expr)*
+exclude_expr ::= arrow_expr (MINUS arrow_expr)*
+
+arrow_expr ::= perm_primary_ arrow_tail*
+arrow_tail ::= ARROW member_ref | DOT IDENTIFIER LPAREN member_ref RPAREN
+
+private perm_primary_ ::= NIL | paren_expr | local_ref
+paren_expr ::= LPAREN perm_expr RPAREN {pin=1}
+
+local_ref ::= IDENTIFIER {
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbRefElementImpl"
+}
+
+member_ref ::= IDENTIFIER {
+  mixin="com.authzed.intellij.spicedb.psi.impl.SpiceDbRefElementImpl"
+}
